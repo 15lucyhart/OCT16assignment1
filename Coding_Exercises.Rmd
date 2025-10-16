@@ -3,3 +3,72 @@ title: "Coding_Exercises"
 output: html_document
 ---
 
+```{r}
+source("setup.R")
+```
+
+Load data
+```{r}
+data("knz_bison")
+```
+
+```{r}
+glimpse(knz_bison)
+```
+
+## 1 Create a new column in the bison dataset that calculates the individual’s age at the time of observation.
+```{r}
+data("knz_bison")
+
+bison_with_age <- knz_bison %>%
+  mutate(age_years = rec_year - animal_yob)
+
+```
+
+## 2 Write a function that will first filter the bison dataset based on any user-specified weight threshold (returning the filtered dataset).
+```{r}
+filter_bison_by_weight <- function(weight_threshold) {
+  bison_with_age %>%
+    filter(animal_weight > weight_threshold)
+}
+```
+Testing the function:
+```{r}
+filter_bison_by_weight(1000)
+```
+```{r}
+filter_bison_by_weight(2000)
+
+```
+
+## 3 Create a boxplot showing weight distribution between male and female bison, and then conduct a t-test to see if weight is significantly difference between males and females.
+
+Boxplot showing weight distribution between male and female bison:
+```{r}
+ggplot(bison_with_age, aes(x = animal_sex, y = animal_weight, fill = animal_sex)) +
+  geom_boxplot() +
+  labs(
+    title = "Weight Distribution Between Male and Female Bison",
+    x = "Sex",
+    y = "Weight (kg)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+T-test:
+```{r}
+t_test_result <- t.test(animal_weight ~ animal_sex, data = bison_with_age)
+t_test_result
+```
+Seeing if male or female bison are heavier:
+```{r}
+bison_with_age %>%
+  group_by(animal_sex) %>%
+  summarize(mean_weight = mean(animal_weight, na.rm = TRUE),
+            median_weight = median(animal_weight, na.rm = TRUE),
+            n = n())
+```
+
+Interpretation of T-Test: 
+The p-value is far below 0.05, indicating that there is a statistically significant difference in weight between male and female bison. The mean weight of female bison is 762 kg and the mean weight of male bison is 728 kg. So, according to both the boxplot and the T-test, female bison are heavier than male bison in this dataset.
